@@ -1,0 +1,136 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { CheckCircle, Download, Calendar, Clock, MapPin, MonitorPlay, Ticket } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/Button';
+
+const BookingConfirmation = ({ booking }) => {
+  if (!booking) return null;
+
+  const { bookingId, movie, theatre, show, seats, totalPrice, createdAt } = booking;
+  
+  const bookingDate = createdAt ? new Date(createdAt).toLocaleString() : new Date().toLocaleString();
+  const showDate = new Date(show?.date || Date.now()).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  return (
+    <div className="w-full max-w-2xl mx-auto py-8 px-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-surface border border-border rounded-2xl overflow-hidden shadow-lg"
+      >
+        {/* Success Header */}
+        <div className="bg-success/10 p-8 flex flex-col items-center justify-center text-center border-b border-success/20">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+          >
+            <CheckCircle className="w-20 h-20 text-success mb-4" />
+          </motion.div>
+          <h1 className="text-3xl font-bold text-text-primary mb-2">Booking Confirmed!</h1>
+          <p className="text-text-secondary">Your tickets have been successfully booked.</p>
+          
+          <div className="mt-6 px-6 py-3 bg-surface rounded-xl border border-border border-dashed flex flex-col items-center">
+            <span className="text-xs text-text-muted uppercase tracking-wider">Booking ID</span>
+            <span className="text-xl font-mono font-bold text-primary mt-1">{bookingId || 'BK9876543210'}</span>
+          </div>
+        </div>
+
+        {/* Ticket Details */}
+        <div className="p-8">
+          <div className="flex flex-col md:flex-row gap-6 mb-8 pb-8 border-b border-border">
+            {/* Poster (if available) */}
+            {movie?.poster ? (
+              <img src={movie.poster} alt={movie.title} className="w-32 h-48 object-cover rounded-lg shadow-md hidden md:block" />
+            ) : (
+              <div className="w-32 h-48 bg-surface-elevated rounded-lg hidden md:flex items-center justify-center text-text-muted">
+                <Ticket className="w-12 h-12 opacity-50" />
+              </div>
+            )}
+            
+            <div className="flex-1 space-y-4">
+              <div>
+                <h2 className="text-2xl font-bold text-text-primary">{movie?.title || 'Movie Title'}</h2>
+                <div className="text-sm text-text-muted mt-1">{movie?.language} • {movie?.certification}</div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-text-primary">{theatre?.name || 'Theatre Name'}</div>
+                    <div className="text-sm text-text-muted">{theatre?.location || 'Location'}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <MonitorPlay className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-text-primary">Screen</div>
+                    <div className="text-sm text-text-muted">{show?.screenType || 'Standard'}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-text-primary">{showDate}</div>
+                    <div className="text-sm text-text-muted">Date</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-text-primary">{show?.time || '10:00 AM'}</div>
+                    <div className="text-sm text-text-muted">Time</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Seats and Amount */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mb-8 bg-surface-elevated p-6 rounded-xl">
+            <div className="text-center sm:text-left">
+              <div className="text-sm text-text-muted mb-1">Seats</div>
+              <div className="text-lg font-bold text-text-primary">
+                {Array.isArray(seats) ? seats.join(', ') : (seats || 'A1, A2')}
+              </div>
+            </div>
+            
+            <div className="hidden sm:block w-px h-12 bg-border"></div>
+            
+            <div className="text-center sm:text-right">
+              <div className="text-sm text-text-muted mb-1">Amount Paid</div>
+              <div className="text-2xl font-bold text-primary">₹{totalPrice?.toFixed(2) || '0.00'}</div>
+            </div>
+          </div>
+
+          <div className="text-center text-xs text-text-muted mb-8">
+            Booked on {bookingDate}
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button variant="secondary" className="flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              Download Ticket
+            </Button>
+            <Link to="/">
+              <Button>Back to Home</Button>
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default BookingConfirmation;

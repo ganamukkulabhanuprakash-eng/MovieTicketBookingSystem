@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  
+  /* Canvas / backgrounds */
+  --color-canvas: #09090b;
+  --color-surface: #18181b;
+  --color-surface-elevated: #27272a;
+  
+  /* Primary accent — warm amber/gold for a cinema feel */
+  --color-primary: #f59e0b;
+  --color-primary-hover: #d97706;
+  --color-primary-subtle: rgba(245, 158, 11, 0.1);
+  
+  /* Text */
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  
+  /* Borders */
+  --color-border: #27272a;
+  --color-border-hover: #3f3f46;
+  
+  /* Semantic */
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  
+  /* Seat colors */
+  --color-seat-available: #27272a;
+  --color-seat-selected: #f59e0b;
+  --color-seat-booked: #18181b;
+  --color-seat-premium: #a855f7;
+  --color-seat-economy: #06b6d4;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-elevated);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+/* Focus ring utility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
