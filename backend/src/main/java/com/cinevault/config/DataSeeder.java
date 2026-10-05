@@ -33,10 +33,32 @@ public class DataSeeder {
             ScreenRepository screenRepository,
             SeatRepository seatRepository,
             ShowRepository showRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            @org.springframework.beans.factory.annotation.Value("${admin.email:admin@cinevault.com}") String adminEmail,
+            @org.springframework.beans.factory.annotation.Value("${admin.password:}") String adminPasswordRaw,
+            @org.springframework.beans.factory.annotation.Value("${admin.name:CineVault Admin}") String adminName) {
 
         return args -> {
-            // Only seed if database is empty
+            // ── ADMIN BOOTSTRAP (always runs, idempotent) ────────────────
+            // Only creates the admin if it doesn't already exist.
+            if (!userRepository.existsByEmail(adminEmail.toLowerCase().trim())) {
+                String rawPassword = (adminPasswordRaw == null || adminPasswordRaw.isBlank())
+                        ? "Admin@CineVault2026!"  // dev-only fallback; override via ADMIN_PASSWORD env var
+                        : adminPasswordRaw;
+
+                User admin = new User(
+                        adminName,
+                        adminEmail.toLowerCase().trim(),
+                        passwordEncoder.encode(rawPassword),
+                        com.cinevault.entity.enums.UserRole.ADMIN
+                );
+                userRepository.save(admin);
+                System.out.println("[DataSeeder] ✓ Admin account created: " + adminEmail);
+            } else {
+                System.out.println("[DataSeeder] Admin account already exists. Skipping creation.");
+            }
+
+            // Only seed movie/theatre/show data if database is empty
             if (movieRepository.count() > 0) {
                 System.out.println("[DataSeeder] Database already seeded. Skipping.");
                 return;
@@ -44,16 +66,14 @@ public class DataSeeder {
 
             System.out.println("[DataSeeder] Seeding database with initial data...");
 
-            // ── 1. USERS ──────────────────────────────────────────────
-            User admin = new User("Admin", "admin@cinevault.com",
-                    passwordEncoder.encode("admin123"), UserRole.ADMIN);
+            // ── TEST USERS ────────────────────────────────────────────
             User testUser = new User("Bhanu Prakash", "bhanu@gmail.com",
                     passwordEncoder.encode("user123"));
             User testUser2 = new User("Ravi Kumar", "ravi@gmail.com",
                     passwordEncoder.encode("user123"));
 
-            userRepository.saveAll(List.of(admin, testUser, testUser2));
-            System.out.println("[DataSeeder] Created " + 3 + " users (1 admin, 2 regular)");
+            userRepository.saveAll(java.util.List.of(testUser, testUser2));
+            System.out.println("[DataSeeder] Created 2 test users");
 
             // ── 2. MOVIES ─────────────────────────────────────────────
             List<Movie> movies = createMovies();

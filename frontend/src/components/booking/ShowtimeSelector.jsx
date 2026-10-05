@@ -4,12 +4,12 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 
 const ShowtimeSelector = ({ shows = [], theatres = [], selectedShow, onShowSelect }) => {
-  // Generate next 5 days
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return today.getTime();
-  });
+  const formatDateKey = (d) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const generateDates = () => {
     const dates = [];
@@ -17,28 +17,29 @@ const ShowtimeSelector = ({ shows = [], theatres = [], selectedShow, onShowSelec
     for (let i = 0; i < 5; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      date.setHours(0, 0, 0, 0);
       dates.push(date);
     }
     return dates;
   };
 
   const dates = generateDates();
+  const [selectedDateKey, setSelectedDateKey] = useState(() => formatDateKey(new Date()));
 
   // Group shows by theatre
   const groupedShows = theatres.reduce((acc, theatre) => {
     // Filter shows for this theatre and selected date
     const theatreShows = shows.filter(show => {
       if (show.theatreId !== theatre.id) return false;
-      const showDate = new Date(show.date);
-      showDate.setHours(0, 0, 0, 0);
-      return showDate.getTime() === selectedDate;
+      const showDateKey = typeof show.date === 'string'
+        ? show.date.split('T')[0]
+        : formatDateKey(new Date(show.date));
+      return showDateKey === selectedDateKey;
     });
 
     if (theatreShows.length > 0) {
       acc.push({
         theatre,
-        shows: theatreShows.sort((a, b) => a.time.localeCompare(b.time))
+        shows: theatreShows.sort((a, b) => (a.time || '').localeCompare(b.time || ''))
       });
     }
     return acc;
@@ -66,11 +67,12 @@ const ShowtimeSelector = ({ shows = [], theatres = [], selectedShow, onShowSelec
         </h3>
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
           {dates.map((date) => {
-            const isSelected = date.getTime() === selectedDate;
+            const key = formatDateKey(date);
+            const isSelected = key === selectedDateKey;
             return (
               <button
-                key={date.getTime()}
-                onClick={() => setSelectedDate(date.getTime())}
+                key={key}
+                onClick={() => setSelectedDateKey(key)}
                 className={`flex flex-col items-center justify-center min-w-[70px] py-2 px-3 rounded-xl border transition-all ${
                   isSelected 
                     ? 'border-primary bg-primary/10 text-primary' 

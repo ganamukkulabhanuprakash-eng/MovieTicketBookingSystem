@@ -15,6 +15,6 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
      * Find all booked seat IDs for a specific show.
      * Only considers CONFIRMED or PENDING bookings (not cancelled).
      */
-    @Query("SELECT bs.seat.id FROM BookingSeat bs WHERE bs.show.id = :showId AND bs.booking.status IN ('CONFIRMED', 'PENDING')")
+    @Query("SELECT bs.seat.id FROM BookingSeat bs WHERE bs.show.id = :showId AND bs.booking.status IN (com.cinevault.entity.enums.BookingStatus.CONFIRMED, com.cinevault.entity.enums.BookingStatus.PENDING)")
     List<Long> findBookedSeatIdsByShowId(@Param("showId") Long showId);
 }

@@ -63,9 +63,32 @@ const PaymentForm = ({ totalAmount, onPaymentComplete, onCancel }) => {
     <div className="w-full max-w-md mx-auto bg-surface rounded-xl border border-border overflow-hidden">
       
       {/* Demo Banner */}
-      <div className="bg-primary/10 text-primary p-3 text-sm flex items-center justify-center gap-2 border-b border-primary/20">
-        <AlertCircle className="w-4 h-4" />
-        This is a demo payment interface. Do not enter real card details.
+      <div className="bg-primary/10 text-primary p-3 text-sm flex items-center justify-between gap-2 border-b border-primary/20">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>Demo payment interface</span>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          disabled={isProcessing}
+          onClick={() => {
+            setIsProcessing(true);
+            setTimeout(() => {
+              setIsProcessing(false);
+              onPaymentComplete({
+                transactionId: `TXN${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+                amount: totalAmount,
+                status: 'SUCCESS',
+                method: 'DEMO_1_CLICK'
+              });
+            }, 600);
+          }}
+          className="text-xs py-1 px-3 h-auto"
+        >
+          {isProcessing ? 'Confirming...' : '⚡ Quick Demo Pay'}
+        </Button>
       </div>
 
       <div className="p-6">

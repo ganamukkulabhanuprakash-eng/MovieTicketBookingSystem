@@ -26,6 +26,7 @@ export default function BookingPage() {
   const [selectedSeats, setSelectedSeats] = useState([]);
   
   const [bookingConfirmation, setBookingConfirmation] = useState(null);
+  const [bookingError, setBookingError] = useState(null);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -82,12 +83,14 @@ export default function BookingPage() {
   const handlePaymentComplete = async (paymentResult) => {
     try {
       setLoading(true);
+      setBookingError(null);
       const bookingData = {
-        movieId: movie.id,
+        movieId: movie?.id,
         showId: selectedShow.id,
         theatreId: selectedShow.theatreId,
+        seatLabels: selectedSeats,
         seats: selectedSeats,
-        totalPrice: calculateTotalPrice() + (selectedSeats.length * 30), // include fee
+        totalPrice: calculateTotalPrice() + (selectedSeats.length * 30),
         payment: paymentResult
       };
       const confirmation = await api.createBooking(bookingData);
@@ -99,7 +102,8 @@ export default function BookingPage() {
       });
       setStep('confirmation');
     } catch (err) {
-      console.error(err);
+      console.error('Booking failed:', err);
+      setBookingError(err.message || 'Booking could not be completed. The selected seats may already be reserved.');
     } finally {
       setLoading(false);
     }
@@ -218,6 +222,11 @@ export default function BookingPage() {
 
         {step === 'payment' && (
           <div className="max-w-md mx-auto">
+            {bookingError && (
+              <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                {bookingError}
+              </div>
+            )}
             <PaymentForm 
               totalAmount={calculateTotalPrice() + (selectedSeats.length * 30)} 
               onPaymentComplete={handlePaymentComplete}

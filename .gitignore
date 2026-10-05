@@ -1,18 +1,24 @@
 # ===========================
 # Backend
 # ===========================
+target/
+**/target/
 backend/target/
-backend/.env
-backend/.env.local
+*.class
+*.jar
+*.war
 backend/*.log
+*.log
 
 # ===========================
 # Frontend
 # ===========================
+node_modules/
+**/node_modules/
 frontend/node_modules/
+dist/
+**/dist/
 frontend/dist/
-frontend/.env
-frontend/.env.local
 
 # ===========================
 # IDE / OS
@@ -22,11 +28,17 @@ frontend/.env.local
 .vscode/
 .DS_Store
 Thumbs.db
-*.class
 
 # ===========================
 # Secrets — NEVER commit these
 # ===========================
+.env
+.env.*
 *.env
+!.env.example
+*application-local.properties*
 application-local.properties
 application-secret.properties
+*.pem
+*.key
+

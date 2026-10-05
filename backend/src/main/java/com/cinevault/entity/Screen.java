@@ -33,6 +33,9 @@ public class Screen extends BaseEntity {
     @OneToMany(mappedBy = "screen", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Show> shows = new ArrayList<>();
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     // Constructors
     public Screen() { super(); }
 
@@ -53,6 +56,9 @@ public class Screen extends BaseEntity {
 
     public Integer getTotalSeats() { return totalSeats; }
     public void setTotalSeats(Integer totalSeats) { this.totalSeats = totalSeats; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 
     public Theatre getTheatre() { return theatre; }
     public void setTheatre(Theatre theatre) { this.theatre = theatre; }

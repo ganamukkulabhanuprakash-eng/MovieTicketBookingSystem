@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Clapperboard, Search, Menu, X, User } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Clapperboard, Search, Menu, X, User, LogOut, Shield } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -19,8 +22,13 @@ export default function Navbar() {
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    closeMobileMenu();
+  };
+
   return (
-    // `relative` here gives the absolute mobile panel a correct stacking ancestor
     <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-canvas/80 border-b border-border relative">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
 
@@ -50,23 +58,55 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className={`text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none
+                focus-visible:ring-2 focus-visible:ring-primary rounded px-1 py-0.5 ${
+                isActive('/admin')
+                  ? 'text-primary border-b-2 border-primary pb-0'
+                  : 'text-text-secondary'
+              }`}
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         {/* ── Desktop Right Actions ── */}
         <div className="hidden md:flex items-center gap-3">
-          <button
-            aria-label="Search"
-            className="text-text-secondary hover:text-primary transition-colors p-2 rounded-full
-                       hover:bg-surface-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <Search className="w-5 h-5" aria-hidden="true" />
-          </button>
-          <Link to="/login">
-            <Button className="flex items-center gap-2">
-              <User className="w-4 h-4" aria-hidden="true" />
-              Sign In
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm text-text-secondary hidden lg:block">
+                {isAdmin && <Shield className="w-4 h-4 inline mr-1 text-primary" />}
+                {user?.name}
+              </span>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1 text-sm text-text-secondary hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-elevated"
+                aria-label="Sign out"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button className="flex items-center gap-2">
+                  <User className="w-4 h-4" aria-hidden="true" />
+                  Sign In
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* ── Mobile Menu Toggle ── */}
@@ -106,17 +146,32 @@ export default function Navbar() {
               {link.name}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={closeMobileMenu}
+              className="block px-4 py-2.5 rounded-lg text-base font-medium transition-colors text-text-secondary hover:text-text-primary hover:bg-surface-elevated"
+            >
+              Admin Dashboard
+            </Link>
+          )}
 
           <div className="flex items-center gap-3 pt-4 mt-2 border-t border-border">
-            <button className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-lg
-                               bg-surface-elevated text-text-primary hover:bg-border hover:text-text-primary
-                               text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-              <Search className="w-4 h-4" aria-hidden="true" />
-              Search
-            </button>
-            <Link to="/login" className="flex-1" onClick={closeMobileMenu}>
-              <Button fullWidth>Sign In</Button>
-            </Link>
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-lg
+                           bg-surface-elevated text-text-primary hover:bg-border
+                           text-sm font-medium transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            ) : (
+              <Link to="/login" className="flex-1" onClick={closeMobileMenu}>
+                <Button fullWidth>Sign In</Button>
+              </Link>
+            )}
           </div>
         </div>
       )}

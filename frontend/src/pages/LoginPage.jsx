@@ -1,26 +1,51 @@
 import React, { useState } from 'react';
 import Input from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, Clapperboard } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Clapperboard, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { authApi } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login submitted:', formData);
+    setLoading(true);
+    setError('');
+    try {
+      const data = await authApi.login({ email: formData.email, password: formData.password });
+      if (!data.token) {
+        setError(data.message || 'Login failed. Please check your credentials.');
+        return;
+      }
+      login(data);
+      if (data.role === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full space-y-8 bg-surface p-8 rounded-2xl shadow-lg border border-border"
@@ -31,10 +56,17 @@ export default function LoginPage() {
             Sign in to CineVault
           </h2>
           <p className="mt-2 text-center text-sm text-text-secondary">
-            Authentication will be connected to the backend API
+            Use your email and password to sign in
           </p>
         </div>
-        
+
+        {error && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            {error}
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="relative">
@@ -65,14 +97,14 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Sign In
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
 
         <div className="text-center mt-4">
           <Link to="/register" className="text-sm font-medium text-primary hover:text-primary-hover">
-            Don't have an account? Register
+            Don&apos;t have an account? Register
           </Link>
         </div>
       </motion.div>
